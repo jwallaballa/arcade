@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Leaderboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for a retro arcade feel - Copied from index.html for consistency */
+        body {
+            font-family: 'Press Start 2P', cursive, 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-image: url('https://placehold.co/1920x1080/0d1117/e2e8f0?text=ARCADE%20BACKGROUND');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            overflow-y: auto;
+        }
+        .font-sans-default {
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            background-color: #1c2633;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4), 0 0 10px rgba(0, 255, 255, 0.2) inset;
+            padding: 3rem;
+            max-width: 960px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            border: 5px solid #00ffff;
+            animation: pulse-border 2s infinite alternate;
+        }
+        @keyframes pulse-border {
+            from { border-color: #00ffff; box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4), 0 0 10px rgba(0, 255, 255, 0.2) inset; }
+            to { border-color: #ff00ff; box-shadow: 0 10px 25px rgba(255, 0, 255, 0.4), 0 0 10px rgba(255, 0, 255, 0.2) inset; }
+        }
+        .title-text {
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+        }
+        .back-button {
+             @apply bg-gradient-to-br from-red-500 to-pink-700 hover:from-red-600 hover:to-pink-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 active:scale-95;
+             border: 2px solid #fff;
+             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+                border-radius: 1rem;
+            }
+            .back-button {
+                width: 100%;
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            .header-content-wrapper {
+                flex-direction: column;
+            }
+            .gif-container {
+                margin-bottom: 0.5rem;
+            }
+        }
+        .gif-container {
+            display: flex;
+            justify-content: center;
+        }
+        .arcade-gif {
+            max-width: 150px;
+            height: auto;
+            border-radius: 0.5rem;
+            animation: pulse-gif-glow 2s infinite alternate;
+        }
+        .header-content-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        @keyframes pulse-gif-glow {
+            0% {
+                border: 3px solid #ffa500;
+                box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
+            }
+            50% {
+                border: 3px solid #00ff00;
+                box-shadow: 0 0 25px rgba(0, 255, 0, 0.8);
+            }
+            100% {
+                border: 3px solid #ffa500;
+                box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
+            }
+        }
+        /* Leaderboard table styles */
+        .leaderboard-table {
+            @apply w-full text-left table-auto border-collapse;
+            font-family: 'Press Start 2P', cursive, monospace;
+            color: #00ff00;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+            /* Centering the table with a fixed max-width and margin auto */
+            max-width: 700px; /* Adjust this value as needed */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            @apply p-4 border-b border-green-700;
+            text-shadow: 0 0 3px rgba(0, 255, 0, 0.7);
+        }
+        .leaderboard-table th {
+            @apply text-lg uppercase font-bold text-yellow-400;
+            text-shadow: 0 0 5px rgba(255, 255, 0, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-content-wrapper">
+            <div class="gif-container">
+                <img src="{{ url_for('static', filename='images/pixle_duck.gif') }}"
+                     alt="Retro Arcade Animation" class="arcade-gif">
+            </div>
+            <h1 class="text-5xl font-bold text-center title-text">LEADERBOARD</h1>
+            <div class="gif-container">
+               <img src="{{ url_for('static', filename='images/pixle_duck.gif') }}"
+                     alt="Retro Arcade Animation" class="arcade-gif">
+            </div>
+        </div>
+
+        {% if error %}
+            <div class="text-center text-lg text-red-400">{{ error }}</div>
+        {% endif %}
+
+        <div class="table-responsive">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Game</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    {% if leaderboard_data %}
+                        {% for entry in leaderboard_data %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ entry.game_name }}</td>
+                            <td>{{ entry.initials }}</td>
+                            <td>{{ entry.score }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-gray-400">No high scores found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-center mt-6">
+            <a href="/" class="back-button">BACK TO MENU</a>
+        </div>
+    </div>
+</body>
+</html>

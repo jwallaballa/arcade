@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Ducky Arcade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive, 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-image: url('https://placehold.co/1920x1080/0d1117/e2e8f0?text=ARCADE%20BACKGROUND');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            overflow-y: auto;
+        }
+        .font-sans-default {
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            background-color: #1c2633;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4), 0 0 10px rgba(0, 255, 255, 0.2) inset;
+            padding: 3rem;
+            max-width: 960px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            border: 5px solid #00ffff;
+            animation: pulse-border 2s infinite alternate;
+        }
+
+        @keyframes pulse-border {
+            from { border-color: #00ffff; box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4), 0 0 10px rgba(0, 255, 255, 0.2) inset; }
+            to { border-color: #ff00ff; box-shadow: 0 10px 25px rgba(255, 0, 255, 0.4), 0 0 10px rgba(255, 0, 255, 0.2) inset; }
+        }
+
+        .title-text {
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+        }
+
+        .game-select-button {
+            @apply bg-gradient-to-br from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-bold py-4 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-110 active:scale-95;
+            border: 2px solid #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        #game-selection.hidden {
+            display: none !important;
+        }
+
+        .game-output-area {
+            background-color: #0d1117;
+            border: 3px solid #00ff00;
+            min-height: 250px;
+            padding: 1.5rem;
+            font-family: 'Press Start 2P', cursive, monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 450px;
+            border-radius: 0.75rem;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+            color: #00ff00;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
+        }
+        .game-input-group {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .game-input {
+            @apply flex-grow p-4 rounded-xl bg-gray-800 border-2 border-green-500 text-white focus:outline-none focus:ring-4 focus:ring-green-700;
+            font-family: 'Press Start 2P', cursive, monospace;
+            color: #00ff00;
+            text-shadow: 0 0 3px rgba(0, 255, 0, 0.7);
+        }
+        .game-submit-button, .game-reset-button {
+            @apply bg-gradient-to-br from-green-500 to-emerald-700 hover:from-green-600 hover:to-emerald-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 active:scale-95;
+            border: 2px solid #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .back-button {
+             @apply bg-gradient-to-br from-red-500 to-pink-700 hover:from-red-600 hover:to-pink-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 active:scale-95;
+             border: 2px solid #fff;
+             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .game-control-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+                border-radius: 1rem;
+            }
+            .game-select-button {
+                padding: 12px 24px;
+                font-size: 0.9rem;
+            }
+            .game-input-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .game-input {
+                width: 100%;
+            }
+            .game-submit-button, .game-reset-button, .back-button {
+                width: 100%;
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            .game-control-buttons {
+                flex-direction: column;
+            }
+            .header-content-wrapper {
+                flex-direction: column;
+            }
+            .gif-container {
+                margin-bottom: 0.5rem;
+            }
+        }
+        .gif-container {
+            display: flex;
+            justify-content: center;
+        }
+        .arcade-gif {
+            max-width: 150px;
+            height: auto;
+            border-radius: 0.5rem;
+            animation: pulse-gif-glow 2s infinite alternate;
+        }
+        .header-content-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @keyframes pulse-gif-glow {
+            0% {
+                border: 3px solid #ffa500;
+                box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
+            }
+            50% {
+                border: 3px solid #00ff00;
+                box-shadow: 0 0 25px rgba(0, 255, 0, 0.8);
+            }
+            100% {
+                border: 3px solid #ffa500;
+                box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
+            }
+        }
+
+        #text-game-output-area {
+            background-color: #0d1117;
+            border: 3px solid #00ff00;
+            min-height: 250px;
+
+            padding: 0.8rem;
+            font-family: 'Press Start 2P', cursive, monospace;
+            white-space: pre;
+
+            overflow-x: auto;
+            max-height: 450px;
+            border-radius: 0.75rem;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+            color: #00ff00;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
+
+            font-size: 14px;
+            line-height: 1.1;
+
+            margin-left: auto;
+            margin-right: auto;
+
+            max-width: 82ch;
+        }
+
+        .text-center-content {
+            text-align: center;
+        }
+
+        .width-pong {
+            max-width: 82ch;
+        }
+
+        .width-snake {
+            max-width: 62ch;
+        }
+
+        .width-ttt {
+            max-width: 40ch;
+        }
+
+        .leaderboard-table {
+            @apply w-full text-left table-auto border-collapse;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            @apply p-4 border-b-2 border-green-500;
+        }
+        .leaderboard-table th {
+            @apply text-lg uppercase font-bold text-green-300;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="csrf-token-container" style="display: none;">
+            <input type="hidden" id="csrf-token" value="dummy_csrf_token_for_localhost">
+        </div>
+
+        <div class="header-content-wrapper">
+            <div class="gif-container">
+                <img src="{{ url_for('static', filename='images/pixle_duck.gif') }}"
+                     alt="Retro Arcade Animation" class="arcade-gif">
+            </div>
+
+            <h1 class="text-5xl font-bold text-center title-text">LUCKY DUCKY ARCADE</h1>
+
+            <div class="gif-container">
+                <img src="{{ url_for('static', filename='images/pixle_duck.gif') }}"
+                     alt="Retro Arcade Animation" class="arcade-gif">
+            </div>
+        </div>
+
+        <div id="game-selection" class="flex flex-col sm:flex-row justify-center items-center gap-6">
+            <button class="game-select-button" data-game="pong_ascii">PONG</button>
+            <button class="game-select-button" data-game="snake_ascii">SNAKE</button>
+            <button class="game-select-button" data-game="tic_tac_toe">TIC-TAC-TOE</button>
+            <a href="/leaderboard/" class="game-select-button">LEADERBOARD</a>
+        </div>
+
+        <div id="game-play-area" class="hidden flex-col gap-4">
+            <h2 id="current-game-title" class="text-4xl font-semibold text-center text-green-300 title-text"></h2>
+
+            <div id="text-game-output-area" class="game-output-area font-sans-default">
+            </div>
+
+            <div id="game-input-container" class="game-input-group">
+                <input type="text" id="game-input" class="game-input" placeholder="TYPE COMMAND...">
+                <button id="game-submit" class="game-submit-button">SUBMIT</button>
+            </div>
+            <div class="game-control-buttons">
+                <button id="game-reset" class="game-reset-button">RESET GAME</button>
+                <button id="back-to-menu" class="back-button">BACK TO MENU</button>
+            </div>
+        </div>
+
+        <div id="leaderboard-area" class="hidden flex-col gap-4">
+            <h2 class="text-4xl font-semibold text-center text-green-300 title-text">LEADERBOARD</h2>
+            <div id="leaderboard-content" class="game-output-area font-sans-default">
+                <p class="text-center text-gray-400">Loading...</p>
+            </div>
+            <div class="game-control-buttons">
+                <button id="leaderboard-back-button" class="back-button">BACK TO MENU</button>
+            </div>
+        </div>
+
+    </div>
+
+  <script>
+      const gameSelectionDiv = document.getElementById('game-selection');
+const gamePlayAreaDiv = document.getElementById('game-play-area');
+const currentGameTitle = document.getElementById('current-game-title');
+const textGameOutputDiv = document.getElementById('text-game-output-area');
+const gameInput = document.getElementById('game-input');
+const gameSubmitButton = document.getElementById('game-submit');
+const gameResetButton = document.getElementById('game-reset');
+const backToMenuButton = document.getElementById('back-to-menu');
+const gameInputContainer = document.getElementById('game-input-container');
+const leaderboardButton = document.getElementById('leaderboard-button');
+const leaderboardArea = document.getElementById('leaderboard-area');
+const leaderboardContent = document.getElementById('leaderboard-content');
+const leaderboardBackButton = document.getElementById('leaderboard-back-button');
+
+let activeGame = null;
+let gameLoopId = null;
+let gameReadyToStart = false;
+let gameDisplayNameMap = {
+    'pong_ascii': 'PONG',
+    'snake_ascii': 'SNAKE',
+    'tic_tac_toe': 'TIC-TAC-TOE'
+};
+
+let paddleAMoveDirection = 0;
+let snakeDirection = 'RIGHT';
+
+function getCsrfToken() {
+    return document.getElementById('csrf-token').value;
+}
+
+async function sendCommand(command, extraData = {}) {
+    if (!activeGame) return;
+
+    try {
+        const csrfToken = getCsrfToken();
+        if (!csrfToken) {
+            console.error("CSRF token not found. Cannot send request.");
+            textGameOutputDiv.textContent += '\n[ERROR: CSRF TOKEN MISSING. REFRESH PAGE.]';
+            clearInterval(gameLoopId);
+            gameLoopId = null;
+            return;
+        }
+
+        const payload = {
+            game_name: activeGame,
+            input: command,
+            player_name: '',
+            ...extraData
+        };
+
+        const response = await fetch('http://127.0.0.1:5000/arcade/play', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}. Server response: ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        if (activeGame === 'snake_ascii' && data.output) {
+            const lines = data.output.split('\n');
+            const filteredLines = lines.filter(line => !line.includes('SCORE:'));
+            textGameOutputDiv.textContent = filteredLines.join('\n');
+        } else if (activeGame === 'pong_ascii' || activeGame === 'tic_tac_toe') {
+            textGameOutputDiv.textContent = data.output;
+        } else {
+            textGameOutputDiv.textContent += '\n> ' + command + '\n' + data.output;
+            textGameOutputDiv.scrollTop = textGameOutputDiv.scrollHeight;
+        }
+
+        if (data.state === 'game_over') {
+            clearInterval(gameLoopId);
+            gameLoopId = null;
+            gameInputContainer.style.display = 'none';
+
+        } else if (activeGame === 'pong_ascii' || activeGame === 'snake_ascii') {
+            gameInputContainer.style.display = 'none';
+        } else if (activeGame === 'tic_tac_toe') {
+            const tttInternalState = data.game_internal_state;
+            const humanPlayer = data.human_player;
+            const currentPlayer = data.current_player;
+
+            if (tttInternalState === 'CHOICE' || (tttInternalState === 'PLAYING' && currentPlayer === humanPlayer)) {
+                gameInputContainer.style.display = 'flex';
+                gameInput.focus();
+                if (tttInternalState === 'CHOICE') {
+                    gameInput.placeholder = "TYPE 'X' OR 'O' TO CHOOSE YOUR SIDE";
+                } else {
+                    gameInput.placeholder = "ENTER ROW,COL (E.G., '0,0')";
+                }
+            } else {
+                gameInputContainer.style.display = 'none';
+            }
+        } else {
+            gameInputContainer.style.display = 'flex';
+            gameInput.focus();
+            gameInput.placeholder = "TYPE COMMAND...";
+        }
+    } catch (error) {
+        console.error('Error sending command:', error);
+        textGameOutputDiv.textContent += '\n[ERROR: COULD NOT COMMUNICATE WITH GAME SERVER. ' + error.message + ']';
+        clearInterval(gameLoopId);
+        gameLoopId = null;
+    }
+    gameInput.value = '';
+}
+
+
+async function fetchAndDisplayLeaderboard() {
+    leaderboardContent.innerHTML = '<p class="text-center text-gray-400">LOADING LEADERBOARD...</p>';
+    try {
+        const response = await fetch('http://127.0.0.1:5000/leaderboard/');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        const scores = data.high_scores;
+
+        if (scores.length === 0) {
+            leaderboardContent.innerHTML = '<p class="text-center text-gray-400">NO SCORES YET. BE THE FIRST!</p>';
+            return;
+        }
+
+        let tableHtml = `<table class="leaderboard-table font-sans-default">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Game</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        scores.forEach((score, index) => {
+            tableHtml += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${gameDisplayNameMap[score.game_name] || score.game_name}</td>
+                    <td>${score.player_name}</td>
+                    <td>${score.score}</td>
+                </tr>`;
+        });
+
+        tableHtml += `</tbody></table>`;
+        leaderboardContent.innerHTML = tableHtml;
+
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        leaderboardContent.innerHTML = `<p class="text-center text-red-400">ERROR: COULD NOT LOAD LEADERBOARD.</p>`;
+    }
+}
+
+
+function displaySnakeInstructions() {
+    textGameOutputDiv.textContent =
+        `SNAKE LOADED. PRESS 'ENTER' TO START.\n\n\n` +
+        'INSTRUCTIONS:\n\n' +
+        'USE W, A, S, D KEYS TO MOVE.\n\n' +
+        'EAT \'@\' TO GROW.\n\n' +
+        'DON\'T HIT WALLS OR YOURSELF.\n\n' +
+        'PRESS \'R\' TO RESET.\n\n' +
+        'PRESS \'BACK TO MENU\' TO EXIT.\n';
+}
+
+function displayTicTacToeInstructions() {
+    textGameOutputDiv.textContent =
+        `TIC-TAC-TOE LOADED. LOADING GAME...\n\n` +
+        'INSTRUCTIONS:\n\n' +
+        'TYPE \'X\' OR \'O\' TO CHOOSE YOUR SIDE.\n\n' +
+        'ENTER ROW,COL (E.G., \'0,0\') TO MAKE A MOVE.\n\n' +
+        'PRESS \'R\' TO RESET.\n\n' +
+        'PRESS \'BACK TO MENU\' TO EXIT.\n';
+}
+
+function displayPongInstructions() {
+    textGameOutputDiv.textContent =
+        `PONG LOADED. PRESS 'ENTER' TO START.\n\n\n` +
+        'INSTRUCTIONS:\n\n' +
+        'YOU ARE PLAYER A & CONTROLLING THE LEFT PADDLE.\n\n' +
+        'COMPUTER IS PLAYER B & CONTROLLING THE RIGHT PADDLE.\n\n' +
+        'MOVE YOUR PADDLE WITH W & S\n\n' +
+        'FIRST PLAYER TO 5 POINTS WINS\n';
+}
+
+gameSelectionDiv.addEventListener('click', async (event) => {
+    const button = event.target.closest('.game-select-button');
+    if (button) {
+        if (button.id === 'leaderboard-button') {
+            gameSelectionDiv.classList.add('hidden');
+            gamePlayAreaDiv.classList.add('hidden');
+            leaderboardArea.classList.remove('hidden');
+            leaderboardArea.style.display = 'flex';
+            fetchAndDisplayLeaderboard();
+            return;
+        }
+
+        activeGame = button.dataset.game;
+        const gameDisplayName = gameDisplayNameMap[activeGame];
+        currentGameTitle.textContent = gameDisplayName;
+        currentGameTitle.classList.remove('hidden');
+
+        gameSelectionDiv.classList.add('hidden');
+        gamePlayAreaDiv.classList.remove('hidden');
+        gamePlayAreaDiv.style.display = 'flex';
+
+        if (gameLoopId) {
+            clearInterval(gameLoopId);
+            gameLoopId = null;
+        }
+        paddleAMoveDirection = 0;
+        snakeDirection = 'RIGHT';
+        document.removeEventListener('keydown', handlePongKeydown);
+        document.removeEventListener('keyup', handlePongKeyup);
+        document.removeEventListener('keydown', handleSnakeKeydown);
+
+        textGameOutputDiv.classList.remove('hidden');
+        textGameOutputDiv.classList.remove('width-pong', 'width-snake', 'width-ttt');
+
+        if (activeGame === 'snake_ascii') {
+            textGameOutputDiv.classList.add('width-snake');
+            displaySnakeInstructions();
+        } else if (activeGame === 'pong_ascii') {
+            textGameOutputDiv.classList.add('width-pong');
+            displayPongInstructions();
+        } else if (activeGame === 'tic_tac_toe') {
+            textGameOutputDiv.classList.add('width-ttt');
+            gameInput.placeholder = "TYPE 'X' OR 'O' TO CHOOSE YOUR SIDE";
+            gameInputContainer.style.display = 'flex';
+            gameSubmitButton.style.display = 'inline-block';
+            await sendCommand('start');
+        } else {
+            gameInputContainer.style.display = 'flex';
+            gameInput.focus();
+            gameInput.placeholder = "TYPE COMMAND...";
+            gameSubmitButton.style.display = 'inline-block';
+        }
+        gameReadyToStart = true;
+        gameInput.focus();
+    }
+});
+
+gameSubmitButton.addEventListener('click', async () => {
+    const command = gameInput.value.trim();
+    if (command) {
+        await sendCommand(command);
+    }
+});
+
+gameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        gameSubmitButton.click();
+    }
+});
+
+document.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter' && gameReadyToStart && gameLoopId === null && document.activeElement !== gameInput) {
+        e.preventDefault();
+        gameReadyToStart = false;
+        await sendCommand('start');
+
+        if (activeGame === 'pong_ascii') {
+            document.addEventListener('keydown', handlePongKeydown);
+            document.addEventListener('keyup', handlePongKeyup);
+            gameLoopId = setInterval(() => {
+                sendCommand('update', { paddle_a_move_direction: paddleAMoveDirection });
+            }, 100);
+        } else if (activeGame === 'snake_ascii') {
+            document.addEventListener('keydown', handleSnakeKeydown);
+            gameLoopId = setInterval(() => {
+                sendCommand('update', { snake_direction: snakeDirection });
+            }, 200);
+        }
+    }
+});
+
+const handlePongKeydown = (e) => {
+    if (e.key === 'w' || e.key === 'W') {
+        paddleAMoveDirection = -1;
+    } else if (e.key === 's' || e.key === 'S') {
+        paddleAMoveDirection = 1;
+    }
+};
+
+const handlePongKeyup = (e) => {
+    if ((e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S')) {
+        paddleAMoveDirection = 0;
+    }
+};
+
+const handleSnakeKeydown = (e) => {
+    if (activeGame === 'snake_ascii') {
+        const key = e.key.toUpperCase();
+        let newDirection = '';
+        if (key === 'W') {
+            newDirection = 'UP';
+        } else if (key === 'S') {
+            newDirection = 'DOWN';
+        } else if (key === 'A') {
+            newDirection = 'LEFT';
+        } else if (key === 'D') {
+            newDirection = 'RIGHT';
+        }
+
+        if (newDirection) {
+            console.log(`Key pressed: ${key}. Sending direction: ${newDirection}`);
+            snakeDirection = newDirection;
+        }
+    }
+};
+
+backToMenuButton.addEventListener('click', () => {
+    if (gameLoopId) {
+        clearInterval(gameLoopId);
+        gameLoopId = null;
+    }
+    activeGame = null;
+    paddleAMoveDirection = 0;
+    snakeDirection = 'RIGHT';
+
+    document.removeEventListener('keydown', handlePongKeydown);
+    document.removeEventListener('keyup', handlePongKeyup);
+    document.removeEventListener('keydown', handleSnakeKeydown);
+
+    gamePlayAreaDiv.classList.add('hidden');
+    gamePlayAreaDiv.style.display = 'none';
+    gameSelectionDiv.classList.remove('hidden');
+    gameSelectionDiv.style.display = 'flex';
+    gameInputContainer.style.display = 'none';
+
+    textGameOutputDiv.textContent = '';
+    textGameOutputDiv.classList.remove('text-center-content');
+    gameInput.value = '';
+});
+
+leaderboardBackButton.addEventListener('click', () => {
+    leaderboardArea.classList.add('hidden');
+    leaderboardArea.style.display = 'none';
+    gameSelectionDiv.classList.remove('hidden');
+    gameSelectionDiv.style.display = 'flex';
+});
+
+gameResetButton.addEventListener('click', async () => {
+    if (activeGame) {
+        if (gameLoopId) {
+            clearInterval(gameLoopId);
+            gameLoopId = null;
+        }
+
+        await sendCommand('start');
+        gameReadyToStart = true;
+
+        if (activeGame === 'pong_ascii') {
+            document.addEventListener('keydown', handlePongKeydown);
+            document.addEventListener('keyup', handlePongKeyup);
+            paddleAMoveDirection = 0;
+        } else if (activeGame === 'snake_ascii') {
+            document.addEventListener('keydown', handleSnakeKeydown);
+            snakeDirection = 'RIGHT';
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    gamePlayAreaDiv.classList.add('hidden');
+    gamePlayAreaDiv.style.display = 'none';
+    gameInputContainer.style.display = 'none';
+    leaderboardArea.classList.add('hidden');
+});
+  </script>
+</body>
+</html>
